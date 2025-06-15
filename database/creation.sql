@@ -6,6 +6,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS Medicanico (
   idMedicanico INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
+  senha TEXT NOT NULL,
   reputacao INTEGER NOT NULL,
   preco INTEGER NOT NULL
 );
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS Medicanico (
 CREATE TABLE IF NOT EXISTS Paciente (
   idPaciente INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
+  senha TEXT NOT NULL,
   origem TEXT NOT NULL,
   tolerancia INTEGER NOT NULL,
   Medicanico_idMedicanico INTEGER, -- medicanico fixo do paciente, para onde o mesmo eh enviado em caso de emergencia, apesar de improvavel um paciente pode nao ter um medicanico fixo
@@ -42,14 +44,16 @@ CREATE TABLE IF NOT EXISTS Cromo (
   preco INTEGER NOT NULL,
   psicose INTEGER NOT NULL,
   parte TEXT NOT NULL,
-  Paciente_idPaciente INTEGER NOT NULL,
-  Consulta_dataHora TEXT,
-  Consulta_Medicanico_idMedicanico INTEGER,
-  Consulta_Paciente_idPaciente INTEGER,
+);
+
+CREATE TABLE IF NOT EXISTS Instalacao (
+  Cromo_idCromo INTEGER,
+  Paciente_idPaciente INTEGER,
+  PRIMARY KEY (Cromo_idCromo, Paciente_idPaciente),
   FOREIGN KEY (Paciente_idPaciente)
     REFERENCES Paciente(idPaciente)
-    ON DELETE NO ACTION,
-  FOREIGN KEY (Consulta_Paciente_idPaciente, Consulta_Medicanico_idMedicanico, Consulta_dataHora)
-    REFERENCES Consulta(Paciente_idPaciente, Medicanico_idMedicanico, dataHora)
-    ON DELETE SET NULL
+    ON DELETE CASCADE,
+  FOREIGN KEY (Cromo_idCromo)
+    REFERENCES Cromo(idCromo)
+    ON DELETE CASCADE,
 );
