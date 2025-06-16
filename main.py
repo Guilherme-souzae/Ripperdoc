@@ -5,6 +5,7 @@ from models.cromo import Cromo
 from models.medicanico import Medicanico
 from models.paciente import Paciente
 from frescura.img_to_text import show_logo
+from database.connection import init_db
 
 # cadastros
 def cadastrar_medicanico():
@@ -14,8 +15,7 @@ def cadastrar_medicanico():
     reputacao = 0
     preco = input("Digite seu preço fixo: ")
 
-    medicanico = Medicanico(ssn, nome, senha, reputacao, preco)
-    medicanico.create()
+    Medicanico.create(ssn, nome, senha, reputacao, preco)
 
 def cadastrar_paciente():
     nome = input("Digite seu nome:")
@@ -24,8 +24,7 @@ def cadastrar_paciente():
     origem = input("Digite sua origem:")
     tolerancia = round(max(0, min(100, random.gauss(50, 15))))
 
-    paciente = Paciente(cpf, nome, senha, origem, tolerancia)
-    paciente.create()
+    Paciente.create(cpf, nome, senha, origem, tolerancia)
 
 # logins
 def logar_medicanico():
@@ -39,6 +38,9 @@ def logar_medicanico():
             cpf = input("Digite seu CPF: ")
         else:
             cpf = Medicanico.get_cpf_from_name(nome)
+    else:
+        print("Opção invalida")
+        return
 
     senha = input("Digite sua senha: ")
 
@@ -58,7 +60,10 @@ def logar_paciente():
             print("Seu nome já está cadastrado! Entre com seu CPF")
             cpf = input("Digite seu CPF: ")
         else:
-            cpf = Medicanico.get_cpf_from_name(nome)
+            cpf = Paciente.get_cpf_from_name(nome)
+    else:
+        print("Opção invalida")
+        return
 
     senha = input("Digite sua senha: ")
 
@@ -73,7 +78,38 @@ def menu_medicanico(cpf):
     pass
 
 def menu_paciente(cpf):
-    pass
+    print("\nMenu de paciente:")
+    print("0 - Acessar Loja")
+
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == '0':
+        acessar_loja()
+
+# ações
+def acessar_loja():
+    print("\nLoja:")
+    print("0 - Exibir todos os cromos por lançamento")
+    print("1 - Exibir todos os cromos por preço")
+    print("2 - Escolher fabricante")
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == "0":
+        dados = Cromo.read_all_id()
+        for cromo in dados:
+            print(cromo)
+    elif opcao == "1":
+        dados = Cromo.read_all_preco()
+        for cromo in dados:
+            print(cromo)
+    elif opcao == "2":
+        fabricante = input("Digite o fabricante: ")
+        show_logo(fabricante)
+        dados = Cromo.read_all_fabricante(fabricante)
+        for cromo in dados:
+            print(cromo)
+    else:
+        print("Opcao invalida")
 
 # etc
 def lancar_cromo():
@@ -83,11 +119,12 @@ def lancar_cromo():
     psicose = input("Digite o nível de psicose: ")
     parte = input("Digite a parte do corpo: ")
 
-    cromo = Cromo(nome, fabricante, psicose, parte)
-    cromo.create()
+    Cromo.create(nome, fabricante, preco, psicose, parte)
 
 # main driver
 def main():
+    init_db()
+
     while True:
         print("\nMenu:")
         print("1 - Cadastrar medicânico")
@@ -114,5 +151,4 @@ def main():
             print("Opção inválida.")
 
 if __name__ == "__main__":
-    show_logo("Zetatech")
     main()
