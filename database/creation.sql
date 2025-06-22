@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS Paciente (
   nome TEXT NOT NULL,
   senha TEXT NOT NULL,
   origem TEXT NOT NULL,
+  psicose INTEGER NOT NULL,
   tolerancia INTEGER NOT NULL,
+  dinheiro INTEGER NOT NULL,
   Medicanico_idMedicanico INTEGER, -- medicanico fixo do paciente, para onde o mesmo eh enviado em caso de emergencia, apesar de improvavel um paciente pode nao ter um medicanico fixo
   FOREIGN KEY (Medicanico_idMedicanico)
     REFERENCES Medicanico(idMedicanico)

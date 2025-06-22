@@ -1,6 +1,7 @@
 import random
 
 from models import medicanico
+from models.Instalacao import Instalacao
 from models.cromo import Cromo
 from models.medicanico import Medicanico
 from models.paciente import Paciente
@@ -18,9 +19,9 @@ def cadastrar_medicanico():
     Medicanico.create(ssn, nome, senha, reputacao, preco)
 
 def cadastrar_paciente():
+    cpf = input("Digite seu CPF:")
     nome = input("Digite seu nome:")
     senha = input("Digite sua senha:")
-    cpf = input("Digite seu CPF:")
     origem = input("Digite sua origem:")
     tolerancia = round(max(0, min(100, random.gauss(50, 15))))
 
@@ -56,7 +57,7 @@ def logar_paciente():
         cpf = input("Digite seu CPF: ")
     elif opt == "1":
         nome = input("Digite seu nome: ")
-        if Medicanico.check_if_name_exists(nome):
+        if Paciente.check_if_name_exists(nome):
             print("Seu nome já está cadastrado! Entre com seu CPF")
             cpf = input("Digite seu CPF: ")
         else:
@@ -67,7 +68,7 @@ def logar_paciente():
 
     senha = input("Digite sua senha: ")
 
-    if Medicanico.autenticate(cpf, senha):
+    if Paciente.autenticate(cpf, senha):
         print("Paciente autenticado com sucesso!")
         menu_paciente(cpf)
     else:
@@ -79,14 +80,54 @@ def menu_medicanico(cpf):
 
 def menu_paciente(cpf):
     print("\nMenu de paciente:")
-    print("0 - Acessar Loja")
+    print("0 - Acessar loja")
+    print("1 - Executar varredura")
+    print("2 - Depositar edinhos")
+    print("3 - Agendar consulta")
 
     opcao = input("Escolha uma opção: ")
 
     if opcao == '0':
         acessar_loja()
+    elif opcao == '1':
+        executar_varredura(cpf)
+    elif opcao == '2':
+        depositar(cpf)
 
 # ações
+def agendar_consulta(cpf):
+    print("\nEscolha um medicânico:")
+    numero_instalacoes = input("Digite quantos cromos deseja instalar")
+
+    for i in range(numero_instalacoes):
+        #continuar daqui
+        break
+    pass
+
+def depositar(cpf):
+    deposito = input("\nQuanto deseja depositar?:")
+    Paciente.deposit(cpf, deposito)
+
+def executar_varredura(cpf):
+    dados = Paciente.read(cpf)
+    instalacoes = Instalacao.read_cromos(cpf)
+
+    if dados is None:
+        print("Paciente não encontrado.")
+        return
+
+    print("CPF: ", dados["idPaciente"])
+    print("Nome: ", dados["nome"])
+    print("Origem: ", dados["origem"])
+    print("Cyberpsicose: ", dados["psicose"], "/", dados["tolerancia"])
+    print("Carteira: ", dados["dinheiro"])
+
+    if not instalacoes:
+        print("Nenhum cromo instalado.")
+    else:
+        for c in instalacoes:
+            print(f"{c['fabricante']} - {c['nome']}")
+
 def acessar_loja():
     print("\nLoja:")
     print("0 - Exibir todos os cromos por lançamento")
