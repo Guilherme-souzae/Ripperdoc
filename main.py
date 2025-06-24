@@ -5,18 +5,20 @@ from models.Instalacao import Instalacao
 from models.cromo import Cromo
 from models.medicanico import Medicanico
 from models.paciente import Paciente
+from models.consulta import Consulta
 from frescura.img_to_text import show_logo
 from database.connection import init_db
 
+DIA_ATUAL = 1
+
 # cadastros
 def cadastrar_medicanico():
+    cpf = input("Digite seu CPF: ")
     nome = input("Digite seu nome: ")
-    senha = input("Digite sua senha: ")
-    ssn = input("Digite seu CPF: ")
     reputacao = 0
     preco = input("Digite seu preço fixo: ")
 
-    Medicanico.create(ssn, nome, senha, reputacao, preco)
+    Medicanico.create(cpf, nome, reputacao, preco)
 
 def cadastrar_paciente():
     cpf = input("Digite seu CPF:")
@@ -25,90 +27,42 @@ def cadastrar_paciente():
     origem = input("Digite sua origem:")
     tolerancia = round(max(0, min(100, random.gauss(50, 15))))
 
-    Paciente.create(cpf, nome, senha, origem, tolerancia)
-
-# logins
-def logar_medicanico():
-    opt = input("Digite 0 para entrar com CPF, digite 1 para entrar com nome")
-    if opt == "0":
-        cpf = input("Digite seu CPF: ")
-    elif opt == "1":
-        nome = input("Digite seu nome: ")
-        if Medicanico.check_if_name_exists(nome):
-            print("Seu nome já está cadastrado! Entre com seu CPF")
-            cpf = input("Digite seu CPF: ")
-        else:
-            cpf = Medicanico.get_cpf_from_name(nome)
-    else:
-        print("Opção invalida")
-        return
-
-    senha = input("Digite sua senha: ")
-
-    if Medicanico.autenticate(cpf, senha):
-        print("Medicânico autenticado com sucesso!")
-        menu_medicanico(cpf)
-    else:
-        print("Senha incorreta!")
-
-def logar_paciente():
-    opt = input("Digite 0 para entrar com CPF, digite 1 para entrar com nome")
-    if opt == "0":
-        cpf = input("Digite seu CPF: ")
-    elif opt == "1":
-        nome = input("Digite seu nome: ")
-        if Paciente.check_if_name_exists(nome):
-            print("Seu nome já está cadastrado! Entre com seu CPF")
-            cpf = input("Digite seu CPF: ")
-        else:
-            cpf = Paciente.get_cpf_from_name(nome)
-    else:
-        print("Opção invalida")
-        return
-
-    senha = input("Digite sua senha: ")
-
-    if Paciente.autenticate(cpf, senha):
-        print("Paciente autenticado com sucesso!")
-        menu_paciente(cpf)
-    else:
-        print("Senha incorreta!")
-
-# menus
-def menu_medicanico(cpf):
-    pass
-
-def menu_paciente(cpf):
-    print("\nMenu de paciente:")
-    print("0 - Acessar loja")
-    print("1 - Executar varredura")
-    print("2 - Depositar edinhos")
-    print("3 - Agendar consulta")
-
-    opcao = input("Escolha uma opção: ")
-
-    if opcao == '0':
-        acessar_loja()
-    elif opcao == '1':
-        executar_varredura(cpf)
-    elif opcao == '2':
-        depositar(cpf)
+    Paciente.create(cpf, nome, origem, tolerancia)
 
 # ações
-def agendar_consulta(cpf):
-    print("\nEscolha um medicânico:")
-    numero_instalacoes = input("Digite quantos cromos deseja instalar")
+def criar_consulta():
+    cpf_paciente = Paciente.model_input()
+    cpf_medicanico = Medicanico.model_input()
 
-    for i in range(numero_instalacoes):
-        #continuar daqui
-        break
+    num_instalacoes = input("Digite quantos cromos deseja instalar:")
+    preco_total = 0
+    cromos_a_serem_instalados = []
+
+    for i in num_instalacoes:
+        idCromo = Cromo.model_input()
+        cromos_a_serem_instalados.append(idCromo)
+        preco_total += Cromo.read(idCromo)
+
+    if preco_total > Paciente.read(cpf_paciente):
+        print("Saldo insuficiente, cancelando consulta")
+        return
+
+    Consulta.create(cpf_paciente, cpf_medicanico, DIA_ATUAL, preco_total)
+    for i in num_instalacoes:
+        Instalacao.create(cromos_a_serem_instalados[i], cpf_paciente, cpf_medicanico, DIA_ATUAL)
+
+    DIA_ATUAL + 1
+
+def log_medicanico():
     pass
 
-def depositar(cpf):
+def depositar():
+    cpf = Paciente.model_input()
     deposito = input("\nQuanto deseja depositar?:")
     Paciente.deposit(cpf, deposito)
 
-def executar_varredura(cpf):
+def executar_varredura():
+    cpf = Paciente.model_input()
     dados = Paciente.read(cpf)
     instalacoes = Instalacao.read_cromos(cpf)
 
@@ -128,7 +82,7 @@ def executar_varredura(cpf):
         for c in instalacoes:
             print(f"{c['fabricante']} - {c['nome']}")
 
-def acessar_loja():
+def acessar_catalogo():
     print("\nLoja:")
     print("0 - Exibir todos os cromos por lançamento")
     print("1 - Exibir todos os cromos por preço")
@@ -152,7 +106,6 @@ def acessar_loja():
     else:
         print("Opcao invalida")
 
-# etc
 def lancar_cromo():
     nome = input("Digite o nome do cromo: ")
     fabricante = input("Digite o fabricante: ")
@@ -170,9 +123,12 @@ def main():
         print("\nMenu:")
         print("1 - Cadastrar medicânico")
         print("2 - Cadastrar paciente")
-        print("3 - Logar como medicânico")
-        print("4 - Logar como paciente")
+        print("3 - Criar consulta")
+        print("4 - Log do medicânico")
         print("5 - Lançar novo cromo no mercado")
+        print("6 - Executar varredura no paciente")
+        print("7 - Depositar dinheiro no paciente")
+        print("8 - Consultar catálogo de cromos")
         print("0 - Sair")
         opcao = input("Escolha uma opção: ")
 
@@ -181,15 +137,22 @@ def main():
         elif opcao == '2':
             cadastrar_paciente()
         elif opcao == '3':
-            logar_medicanico()
+            criar_consulta()
         elif opcao == '4':
-            logar_paciente()
+            log_medicanico()
         elif opcao == '5':
             lancar_cromo()
+        elif opcao == '6':
+            executar_varredura()
+        elif opcao == '7':
+            depositar()
+        elif opcao == '8':
+            acessar_catalogo()
         elif opcao == '0':
             break
         else:
             print("Opção inválida.")
+
 
 if __name__ == "__main__":
     main()

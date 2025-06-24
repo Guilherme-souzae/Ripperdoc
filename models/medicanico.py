@@ -3,7 +3,7 @@ from database.connection import get_connection
 class Medicanico:
 
     @staticmethod
-    def create(idMedicanico, nome, senha, reputacao, preco):
+    def create(idMedicanico, nome, reputacao, preco):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO Medicanico (idMedicanico, nome, senha, reputacao, preco) VALUES (?, ?, ?, ?, ?)", (idMedicanico, nome, senha, reputacao, preco))
@@ -24,24 +24,29 @@ class Medicanico:
             return True
 
     @staticmethod
-    def autenticate(cpf, senha):
+    def read(cpf):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT idMedicanico FROM Medicanico WHERE idMedicanico = ? AND senha = ?", (cpf, senha))
+        cursor.execute("SELECT * FROM Medicanico WHERE idMedicanico = ?", (cpf,))
         result = cursor.fetchone()
-        if result == None:
-            return False
-        else:
-            return True
+        cursor.close()
+        conn.close()
+        return result
 
     @staticmethod
-    def get_cpf_from_name(name):
+    def read_all():
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT idMedicanico FROM Medicanico WHERE nome = ?", (name,))
-        result = cursor.fetchone()
+        cursor.execute("SELECT * FROM Medicanico")
+        result = cursor.fetchall()
         conn.close()
-        if result == None:
-            return None
-        else:
-            return result[0]
+        return result
+
+    @staticmethod
+    def model_input():
+        id_exists = None
+        while id_exists is None:
+            id = input("Digite seu CPF:")
+            id_exists = Medicanico.read(id)
+
+        return id

@@ -1,12 +1,8 @@
--- todos os precos sao tratados como INTEGER (ou edinhos)
--- todas as datas sao tratadas como string (ex: '2077-06-02T14:00:00')
-
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS Medicanico (
   idMedicanico INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
-  senha TEXT NOT NULL,
   reputacao INTEGER NOT NULL,
   preco INTEGER NOT NULL
 );
@@ -14,23 +10,22 @@ CREATE TABLE IF NOT EXISTS Medicanico (
 CREATE TABLE IF NOT EXISTS Paciente (
   idPaciente INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
-  senha TEXT NOT NULL,
   origem TEXT NOT NULL,
   psicose INTEGER NOT NULL,
   tolerancia INTEGER NOT NULL,
   dinheiro INTEGER NOT NULL,
-  Medicanico_idMedicanico INTEGER, -- medicanico fixo do paciente, para onde o mesmo eh enviado em caso de emergencia, apesar de improvavel um paciente pode nao ter um medicanico fixo
+  Medicanico_idMedicanico INTEGER,
   FOREIGN KEY (Medicanico_idMedicanico)
     REFERENCES Medicanico(idMedicanico)
     ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS Consulta (
-  dataHora TEXT NOT NULL,
-  preco INTEGER NOT NULL,
+  idConsulta INTEGER NOT NULL,
   Paciente_idPaciente INTEGER NOT NULL,
   Medicanico_idMedicanico INTEGER NOT NULL,
-  PRIMARY KEY (Paciente_idPaciente, Medicanico_idMedicanico, dataHora), -- consultas sao tratadas como entidades fracas formadas pela PK do medicanico, paciente e sua data e hora
+  preco INTEGER NOT NULL,
+  PRIMARY KEY (Paciente_idPaciente, Medicanico_idMedicanico, idConsulta),
   FOREIGN KEY (Paciente_idPaciente)
     REFERENCES Paciente(idPaciente)
     ON DELETE CASCADE,
@@ -51,11 +46,17 @@ CREATE TABLE IF NOT EXISTS Cromo (
 CREATE TABLE IF NOT EXISTS Instalacao (
   Cromo_idCromo INTEGER,
   Paciente_idPaciente INTEGER,
+  Consulta_Paciente_idPaciente INTEGER NOT NULL,
+  Consulta_Medicanico_idMedicanico INTEGER NOT NULL,
+  Consulta_idConsulta INTEGER NOT NULL,
   PRIMARY KEY (Cromo_idCromo, Paciente_idPaciente),
   FOREIGN KEY (Paciente_idPaciente)
     REFERENCES Paciente(idPaciente)
     ON DELETE CASCADE,
   FOREIGN KEY (Cromo_idCromo)
     REFERENCES Cromo(idCromo)
+    ON DELETE CASCADE,
+  FOREIGN KEY (Consulta_Paciente_idPaciente, Consulta_Medicanico_idMedicanico, Consulta_idConsulta)
+    REFERENCES Consulta(Paciente_idPaciente, Medicanico_idMedicanico, idConsulta)
     ON DELETE CASCADE
 );

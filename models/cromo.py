@@ -12,6 +12,16 @@ class Cromo:
         conn.close()
 
     @staticmethod
+    def read(id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Cromo WHERE idCromo = ?", (id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
     def read_all_id():
         conn = get_connection()
         cursor = conn.cursor()
@@ -40,3 +50,22 @@ class Cromo:
         cursor.close()
         conn.close()
         return [dict(row) for row in result]
+
+    @staticmethod
+    def read_preco(idCromo):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT preco FROM Cromo WHERE idCromo = ?", (idCromo,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def model_input():
+        id_exists = None
+        while id_exists is None:
+            id = input("Digite o ID:")
+            id_exists = Cromo.read(id)
+
+        return id
