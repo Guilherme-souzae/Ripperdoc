@@ -6,7 +6,7 @@ class Medicanico:
     def create(idMedicanico, nome, reputacao, preco):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO Medicanico (idMedicanico, nome, senha, reputacao, preco) VALUES (?, ?, ?, ?, ?)", (idMedicanico, nome, senha, reputacao, preco))
+        cursor.execute("INSERT INTO Medicanico (idMedicanico, nome, reputacao, preco) VALUES (?, ?, ?, ?)", (idMedicanico, nome, reputacao, preco))
         conn.commit()
         cursor.close()
         conn.close()

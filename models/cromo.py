@@ -56,7 +56,7 @@ class Cromo:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT preco FROM Cromo WHERE idCromo = ?", (idCromo,))
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         cursor.close()
         conn.close()
         return result

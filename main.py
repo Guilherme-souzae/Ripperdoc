@@ -9,8 +9,6 @@ from models.consulta import Consulta
 from frescura.img_to_text import show_logo
 from database.connection import init_db
 
-DIA_ATUAL = 1
-
 # cadastros
 def cadastrar_medicanico():
     cpf = input("Digite seu CPF: ")
@@ -30,31 +28,31 @@ def cadastrar_paciente():
     Paciente.create(cpf, nome, origem, tolerancia)
 
 # ações
-def criar_consulta():
+def criar_consulta(dia_atual):
     cpf_paciente = Paciente.model_input()
     cpf_medicanico = Medicanico.model_input()
 
-    num_instalacoes = input("Digite quantos cromos deseja instalar:")
+    num_instalacoes = int(input("Digite quantos cromos deseja instalar:"))
     preco_total = 0
     cromos_a_serem_instalados = []
 
-    for i in num_instalacoes:
+    for i in range(num_instalacoes):
         idCromo = Cromo.model_input()
         cromos_a_serem_instalados.append(idCromo)
-        preco_total += Cromo.read(idCromo)
+        preco_total += int(Cromo.read_preco(idCromo)["preco"])
 
-    if preco_total > Paciente.read(cpf_paciente):
+    if preco_total > Paciente.read(cpf_paciente)["dinheiro"]:
         print("Saldo insuficiente, cancelando consulta")
         return
 
-    Consulta.create(cpf_paciente, cpf_medicanico, DIA_ATUAL, preco_total)
-    for i in num_instalacoes:
-        Instalacao.create(cromos_a_serem_instalados[i], cpf_paciente, cpf_medicanico, DIA_ATUAL)
+    Consulta.create(cpf_paciente, cpf_medicanico, dia_atual, preco_total)
+    for i in range(num_instalacoes):
+        Instalacao.create(int(cromos_a_serem_instalados[i]), cpf_paciente, cpf_medicanico, dia_atual)
 
-    DIA_ATUAL + 1
+    dia_atual += 1
 
 def log_medicanico():
-    pass
+    #continuar daqui
 
 def depositar():
     cpf = Paciente.model_input()
@@ -118,6 +116,7 @@ def lancar_cromo():
 # main driver
 def main():
     init_db()
+    dia_atual = 1
 
     while True:
         print("\nMenu:")
@@ -137,7 +136,7 @@ def main():
         elif opcao == '2':
             cadastrar_paciente()
         elif opcao == '3':
-            criar_consulta()
+            criar_consulta(dia_atual)
         elif opcao == '4':
             log_medicanico()
         elif opcao == '5':
