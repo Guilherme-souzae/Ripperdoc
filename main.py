@@ -51,8 +51,28 @@ def criar_consulta(dia_atual):
 
     dia_atual += 1
 
+
 def log_medicanico():
-    #continuar daqui
+    cpf_medicanico = Medicanico.model_input()
+    consultas = Consulta.read_medicanico(cpf_medicanico)
+
+    if not consultas:
+        print("\nNenhuma consulta encontrada para este medicânico.")
+        return
+
+    print(f"\nConsultas do medicânico {cpf_medicanico}:")
+    print("-" * 50)
+    print("ID Consulta | ID Paciente | Preço")
+    print("-" * 50)
+
+    for consulta in consultas:
+        print(f"{consulta['idConsulta']:11} | {consulta['Paciente_idPaciente']:11} | {consulta['preco']:5}")
+
+    total_consultas = len(consultas)
+    total_valor = sum(consulta['preco'] for consulta in consultas)
+    print("-" * 50)
+    print(f"Total de consultas: {total_consultas}")
+    print(f"Valor total: {total_valor}")
 
 def depositar():
     cpf = Paciente.model_input()
@@ -63,10 +83,6 @@ def executar_varredura():
     cpf = Paciente.model_input()
     dados = Paciente.read(cpf)
     instalacoes = Instalacao.read_cromos(cpf)
-
-    if dados is None:
-        print("Paciente não encontrado.")
-        return
 
     print("CPF: ", dados["idPaciente"])
     print("Nome: ", dados["nome"])

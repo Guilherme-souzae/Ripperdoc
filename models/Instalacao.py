@@ -3,10 +3,10 @@ from database.connection import get_connection
 class Instalacao:
 
     @staticmethod
-    def create(idCromo, idPaciente, consulta_medicanico, consulta_id):
+    def create(idCromo, idPaciente, idMedicanico, idConsulta):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO Instalacao (Cromo_idCromo, Paciente_idPaciente, Consulta_Paciente_idPaciente, Consulta_Medicanico_idMedicanico, Consulta_idConsulta) VALUES (?, ?, ?, ?, ?)", (idCromo, idPaciente, idPaciente, consulta_medicanico, consulta_id))
+        cursor.execute("INSERT INTO Instalacao (Cromo_idCromo, Paciente_idPaciente, Consulta_Paciente_idPaciente, Consulta_Medicanico_idMedicanico, Consulta_idConsulta) VALUES (?, ?, ?, ?, ?)",(idCromo, idPaciente, idPaciente, idMedicanico, idConsulta))
         conn.commit()
         cursor.close()
         conn.close()
