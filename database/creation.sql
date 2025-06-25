@@ -3,7 +3,6 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS Medicanico (
   idMedicanico INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
-  reputacao INTEGER NOT NULL,
   preco INTEGER NOT NULL
 );
 
@@ -11,13 +10,8 @@ CREATE TABLE IF NOT EXISTS Paciente (
   idPaciente INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
   origem TEXT NOT NULL,
-  psicose INTEGER NOT NULL,
   tolerancia INTEGER NOT NULL,
-  dinheiro INTEGER NOT NULL,
-  Medicanico_idMedicanico INTEGER,
-  FOREIGN KEY (Medicanico_idMedicanico)
-    REFERENCES Medicanico(idMedicanico)
-    ON DELETE NO ACTION
+  dinheiro INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Consulta (

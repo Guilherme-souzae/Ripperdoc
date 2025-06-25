@@ -1,15 +1,15 @@
 import random
+import time
 
-from models import medicanico
 from models.Instalacao import Instalacao
 from models.cromo import Cromo
 from models.medicanico import Medicanico
 from models.paciente import Paciente
 from models.consulta import Consulta
-from frescura.img_to_text import show_logo
 from database.connection import init_db
 
-# cadastros
+# === CADASTROS ===
+
 def cadastrar_medicanico():
     cpf = input("Digite seu CPF: ")
     nome = input("Digite seu nome: ")
@@ -18,16 +18,18 @@ def cadastrar_medicanico():
 
     Medicanico.create(cpf, nome, reputacao, preco)
 
+
 def cadastrar_paciente():
     cpf = input("Digite seu CPF:")
     nome = input("Digite seu nome:")
-    senha = input("Digite sua senha:")
     origem = input("Digite sua origem:")
     tolerancia = round(max(0, min(100, random.gauss(50, 15))))
 
     Paciente.create(cpf, nome, origem, tolerancia)
 
-# ações
+
+# === AÇÕES ===
+
 def criar_consulta(dia_atual):
     cpf_paciente = Paciente.model_input()
     cpf_medicanico = Medicanico.model_input()
@@ -39,12 +41,13 @@ def criar_consulta(dia_atual):
     for i in range(num_instalacoes):
         idCromo = Cromo.model_input()
         cromos_a_serem_instalados.append(idCromo)
-        preco_total += int(Cromo.read_preco(idCromo)["preco"])
+        preco_total += int(Cromo.read(idCromo)["preco"])
 
     if preco_total > Paciente.read(cpf_paciente)["dinheiro"]:
         print("Saldo insuficiente, cancelando consulta")
         return
 
+    Paciente.deposit(cpf_paciente, -preco_total)
     Consulta.create(cpf_paciente, cpf_medicanico, dia_atual, preco_total)
     for i in range(num_instalacoes):
         Instalacao.create(int(cromos_a_serem_instalados[i]), cpf_paciente, cpf_medicanico, dia_atual)
@@ -61,23 +64,29 @@ def log_medicanico():
         return
 
     print(f"\nConsultas do medicânico {cpf_medicanico}:")
-    print("-" * 50)
-    print("ID Consulta | ID Paciente | Preço")
-    print("-" * 50)
 
+    total_valor = 0
     for consulta in consultas:
-        print(f"{consulta['idConsulta']:11} | {consulta['Paciente_idPaciente']:11} | {consulta['preco']:5}")
+        print(f"ID da Consulta: {consulta['idConsulta']}")
+        print(f"CPF do Paciente: {consulta['Paciente_idPaciente']}")
+        print(f"Preço: {consulta['preco']}")
+        print()  # espaço entre os blocos
 
-    total_consultas = len(consultas)
-    total_valor = sum(consulta['preco'] for consulta in consultas)
-    print("-" * 50)
-    print(f"Total de consultas: {total_consultas}")
-    print(f"Valor total: {total_valor}")
+        total_valor += consulta['preco']
 
-def depositar():
-    cpf = Paciente.model_input()
-    deposito = input("\nQuanto deseja depositar?:")
-    Paciente.deposit(cpf, deposito)
+    print(f"Total de consultas: {len(consultas)}")
+    print(f"Valor total recebido: {total_valor}")
+
+
+def lancar_cromo():
+    nome = input("Digite o nome do cromo: ")
+    fabricante = input("Digite o fabricante: ")
+    preco = input("Digite o preço: ")
+    psicose = input("Digite o nível de psicose: ")
+    parte = input("Digite a parte do corpo: ")
+
+    Cromo.create(nome, fabricante, preco, psicose, parte)
+
 
 def executar_varredura():
     cpf = Paciente.model_input()
@@ -87,7 +96,7 @@ def executar_varredura():
     print("CPF: ", dados["idPaciente"])
     print("Nome: ", dados["nome"])
     print("Origem: ", dados["origem"])
-    print("Cyberpsicose: ", dados["psicose"], "/", dados["tolerancia"])
+    print("Cyberpsicose: ", Paciente.somar_psicose_instalada(cpf), "/", dados["tolerancia"])
     print("Carteira: ", dados["dinheiro"])
 
     if not instalacoes:
@@ -95,6 +104,13 @@ def executar_varredura():
     else:
         for c in instalacoes:
             print(f"{c['fabricante']} - {c['nome']}")
+
+
+def depositar():
+    cpf = Paciente.model_input()
+    deposito = input("\nQuanto deseja depositar?:")
+    Paciente.deposit(cpf, deposito)
+
 
 def acessar_catalogo():
     print("\nLoja:")
@@ -113,60 +129,78 @@ def acessar_catalogo():
             print(cromo)
     elif opcao == "2":
         fabricante = input("Digite o fabricante: ")
-        show_logo(fabricante)
         dados = Cromo.read_all_fabricante(fabricante)
         for cromo in dados:
             print(cromo)
     else:
         print("Opcao invalida")
 
-def lancar_cromo():
-    nome = input("Digite o nome do cromo: ")
-    fabricante = input("Digite o fabricante: ")
-    preco = input("Digite o preço: ")
-    psicose = input("Digite o nível de psicose: ")
-    parte = input("Digite a parte do corpo: ")
 
-    Cromo.create(nome, fabricante, preco, psicose, parte)
+def exibir_ids():
+    medicanicos = Medicanico.read_all()
+    pacientes = Paciente.read_all()
 
-# main driver
+    print("\nMedicânicos cadastrados:")
+    if medicanicos:
+        for m in medicanicos:
+            print(f"- {m['idMedicanico']}")
+    else:
+        print("Nenhum medicânico cadastrado.")
+
+    print("\nPacientes cadastrados:")
+    if pacientes:
+        for p in pacientes:
+            print(f"- {p['idPaciente']}")
+    else:
+        print("Nenhum paciente cadastrado.")
+
+
+# === MAIN DRIVER ===
+
 def main():
     init_db()
-    dia_atual = 1
 
     while True:
-        print("\nMenu:")
-        print("1 - Cadastrar medicânico")
-        print("2 - Cadastrar paciente")
-        print("3 - Criar consulta")
-        print("4 - Log do medicânico")
-        print("5 - Lançar novo cromo no mercado")
-        print("6 - Executar varredura no paciente")
-        print("7 - Depositar dinheiro no paciente")
-        print("8 - Consultar catálogo de cromos")
-        print("0 - Sair")
-        opcao = input("Escolha uma opção: ")
+        timestamp = int(time.time())
 
-        if opcao == '1':
-            cadastrar_medicanico()
-        elif opcao == '2':
-            cadastrar_paciente()
-        elif opcao == '3':
-            criar_consulta(dia_atual)
-        elif opcao == '4':
-            log_medicanico()
-        elif opcao == '5':
-            lancar_cromo()
-        elif opcao == '6':
-            executar_varredura()
-        elif opcao == '7':
-            depositar()
-        elif opcao == '8':
-            acessar_catalogo()
-        elif opcao == '0':
-            break
-        else:
-            print("Opção inválida.")
+        try:
+            print("\nMenu:")
+            print("1 - Cadastrar medicânico")
+            print("2 - Cadastrar paciente")
+            print("3 - Criar consulta")
+            print("4 - Log do medicânico")
+            print("5 - Lançar novo cromo no mercado")
+            print("6 - Executar varredura no paciente")
+            print("7 - Depositar dinheiro no paciente")
+            print("8 - Consultar catálogo de cromos")
+            print("9 - Exibir todos os IDs de medicânicos e pacientes")
+            print("0 - Sair")
+            opcao = input("Escolha uma opção: ")
+
+            if opcao == '1':
+                cadastrar_medicanico()
+            elif opcao == '2':
+                cadastrar_paciente()
+            elif opcao == '3':
+                criar_consulta(timestamp)
+            elif opcao == '4':
+                log_medicanico()
+            elif opcao == '5':
+                lancar_cromo()
+            elif opcao == '6':
+                executar_varredura()
+            elif opcao == '7':
+                depositar()
+            elif opcao == '8':
+                acessar_catalogo()
+            elif opcao == '9':
+                exibir_ids()
+            elif opcao == '0':
+                break
+            else:
+                print("Opção inválida.")
+        except Exception as e:
+            print(f"Ocorreu um erro: {e}")
 
 
 if __name__ == "__main__":

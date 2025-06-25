@@ -3,25 +3,13 @@ from database.connection import get_connection
 class Medicanico:
 
     @staticmethod
-    def create(idMedicanico, nome, reputacao, preco):
+    def create(idMedicanico, nome, preco):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO Medicanico (idMedicanico, nome, reputacao, preco) VALUES (?, ?, ?, ?)", (idMedicanico, nome, reputacao, preco))
+        cursor.execute("INSERT INTO Medicanico (idMedicanico, nome, preco) VALUES (?, ?, ?)", (idMedicanico, nome, preco))
         conn.commit()
         cursor.close()
         conn.close()
-
-    @staticmethod
-    def check_if_name_exists(nome):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT idMedicanico FROM Medicanico WHERE nome = ?", (nome,))
-        result = cursor.fetchone()
-        conn.close()
-        if result == None:
-            return False
-        else:
-            return True
 
     @staticmethod
     def read(cpf):
@@ -46,7 +34,7 @@ class Medicanico:
     def model_input():
         id_exists = None
         while id_exists is None:
-            id = input("Digite seu CPF:")
+            id = input("Digíte o cpf do medicânico:")
             id_exists = Medicanico.read(id)
 
         return id

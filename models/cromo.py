@@ -52,16 +52,6 @@ class Cromo:
         return [dict(row) for row in result]
 
     @staticmethod
-    def read_preco(idCromo):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT preco FROM Cromo WHERE idCromo = ?", (idCromo,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-
-    @staticmethod
     def model_input():
         id_exists = None
         while id_exists is None:
