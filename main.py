@@ -28,6 +28,16 @@ def cadastrar_paciente():
     Paciente.create(cpf, nome, origem, tolerancia)
 
 
+# === CADASTROS ===
+
+def remover_medicanico():
+    cpf = Medicanico.model_input()
+    Medicanico.remove(cpf)
+
+def remover_paciente():
+    cpf = Paciente.model_input()
+    Paciente.remove(cpf)
+
 # === AÇÕES ===
 
 def criar_consulta(dia_atual):

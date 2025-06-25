@@ -12,6 +12,15 @@ class Paciente:
         conn.close()
 
     @staticmethod
+    def remove(cpf):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Paciente WHERE idPaciente = ?", (cpf,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    @staticmethod
     def read(cpf):
         conn = get_connection()
         cursor = conn.cursor()
