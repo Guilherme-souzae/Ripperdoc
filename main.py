@@ -13,10 +13,9 @@ from database.connection import init_db
 def cadastrar_medicanico():
     cpf = input("Digite seu CPF: ")
     nome = input("Digite seu nome: ")
-    reputacao = 0
     preco = input("Digite seu preço fixo: ")
 
-    Medicanico.create(cpf, nome, reputacao, preco)
+    Medicanico.create(cpf, nome, preco)
 
 
 def cadastrar_paciente():
