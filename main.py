@@ -36,15 +36,21 @@ def criar_consulta(dia_atual):
 
     num_instalacoes = int(input("Digite quantos cromos deseja instalar:"))
     preco_total = 0
+    psicose_total = 0
     cromos_a_serem_instalados = []
 
     for i in range(num_instalacoes):
         idCromo = Cromo.model_input()
         cromos_a_serem_instalados.append(idCromo)
         preco_total += int(Cromo.read(idCromo)["preco"])
+        psicose_total += int(Cromo.read(idCromo)["psicose"])
 
     if preco_total > Paciente.read(cpf_paciente)["dinheiro"]:
         print("Saldo insuficiente, cancelando consulta")
+        return
+
+    if psicose_total > Paciente.read(cpf_paciente)["tolerancia"] - Paciente.somar_psicose_instalada(cpf_paciente):
+        print("A instalação vai te tornar um cyberpsicopata, cancelando consulta")
         return
 
     Paciente.deposit(cpf_paciente, -preco_total)

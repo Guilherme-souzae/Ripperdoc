@@ -44,11 +44,7 @@ class Paciente:
     def somar_psicose_instalada(cpf):
         conn = get_connection()
         cursor = conn.cursor()
-
-        cursor.execute(
-            "SELECT SUM(Cromo.psicose) FROM Instalacao JOIN Cromo ON Instalacao.Cromo_idCromo = Cromo.idCromo WHERE Instalacao.Paciente_idPaciente = ?",
-            (cpf,))
-
+        cursor.execute("SELECT SUM(Cromo.psicose) FROM Instalacao JOIN Cromo ON Instalacao.Cromo_idCromo = Cromo.idCromo WHERE Instalacao.Paciente_idPaciente = ?",(cpf,))
         result = cursor.fetchone()
         cursor.close()
         conn.close()
